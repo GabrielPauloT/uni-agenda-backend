@@ -9,11 +9,20 @@ import { TipossalasModule } from './tipossalas/tipossalas.module';
 import { SalasModule } from './salas/salas.module';
 import { TipossolicitantesModule } from './tipossolicitantes/tipossolicitantes.module';
 import { SolicitantesModule } from './solicitantes/solicitantes.module';
-import { RecorrenciasModule } from './recorrencias/recorrencias.module';
 import { AgendamentosModule } from './agendamentos/agendamentos.module';
+import { FaltasModule } from './faltas/faltas.module';
 
 @Module({
-  imports: [PrismaModule, UsuariosModule, TipossalasModule, SalasModule, TipossolicitantesModule, SolicitantesModule, RecorrenciasModule, AgendamentosModule],
+  imports: [
+    PrismaModule,
+    UsuariosModule,
+    TipossalasModule,
+    SalasModule,
+    TipossolicitantesModule,
+    SolicitantesModule,
+    AgendamentosModule,
+    FaltasModule,
+  ],
   controllers: [UsuariosController],
   providers: [UsuariosService],
 })
