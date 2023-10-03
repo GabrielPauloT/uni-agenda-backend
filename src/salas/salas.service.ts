@@ -14,7 +14,7 @@ export class SalasService {
       !createSalaDto.IdTipoDaSala
     ) {
       if (createSalaDto.Capacidade <= 0) {
-        return { message: 'A capacidade deve ser maior que zero', status: 400 };
+        return { message: 'A capacidade deve ser maior que zero', status: 422 };
       }
       return { message: 'Campos obrigatórios faltando', status: 400 };
     }
