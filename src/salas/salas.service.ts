@@ -14,9 +14,12 @@ export class SalasService {
       !createSalaDto.IdTipoDaSala
     ) {
       if (createSalaDto.Capacidade <= 0) {
-        return { message: 'A capacidade deve ser maior que zero', status: 422 };
+        return {
+          Message: 'A capacidade deve ser maior que zero',
+          StatusCode: 422,
+        };
       }
-      return { message: 'Campos obrigatórios faltando', status: 400 };
+      return { Message: 'Campos obrigatórios faltando', StatusCode: 400 };
     }
     const tipoSalaData = await this.prisma.tiposala.findUnique({
       where: { id: createSalaDto.IdTipoDaSala },
@@ -29,14 +32,14 @@ export class SalasService {
           idtiposala: tipoSalaData.id,
         },
       });
-      return { message: 'Sala criada com sucesso', status: 201 };
+      return { Message: 'Sala criada com sucesso', StatusCode: 201 };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          return { message: 'Nome da sala já existe', status: 400 };
+          return { Message: 'Nome da sala já existe', StatusCode: 400 };
         }
-        return { message: 'Ocorreu um erro ao criar a sala', status: 500 };
       }
+      return { Message: err.message, StatusCode: 500 };
     }
   }
 
@@ -45,12 +48,32 @@ export class SalasService {
       const salas = await this.prisma.sala.findMany({
         skip: (page - 1) * perPage,
         take: perPage,
+        include: {
+          tiposala: true,
+        },
       });
-      const total = await this.prisma.sala.count();
-      if (!salas) return { message: 'Nenhuma sala encontrada', status: 404 };
-      return { salas, total, page, perPage, status: 200 };
+
+      if (!salas)
+        return { Message: 'Nenhuma sala encontrada', StatusCode: 404 };
+
+      const TotalRecords = await this.prisma.sala.count();
+
+      return {
+        Result: salas.map((sala) => ({
+          id: sala.id,
+          tipo: sala.tiposala ? sala.tiposala.nomedotipo : null,
+          nome: sala.nomedasala,
+          capacidade: sala.capacidade,
+          createdat: sala.createdat,
+          updatedat: sala.updatedat,
+        })),
+        TotalRecords,
+        page,
+        perPage,
+        StatusCode: 200,
+      };
     } catch (err) {
-      return { message: 'Ocorreu um erro ao listar as salas', status: 500 };
+      return { Message: err.message, StatusCode: 500 };
     }
   }
 
@@ -59,9 +82,10 @@ export class SalasService {
       const sala = await this.prisma.sala.findUnique({
         where: { id: id },
       });
-      return { sala, status: 200 };
+      if (!sala) return { Message: 'Nenhuma sala encontrada', StatusCode: 404 };
+      return { Result: sala, StatusCode: 200 };
     } catch (err) {
-      return { message: 'Sala não encontrada', status: 404 };
+      return { Message: err.message, StatusCode: 500 };
     }
   }
 
@@ -76,30 +100,33 @@ export class SalasService {
         skip: (page - 1) * perPage,
         take: perPage,
       });
-      const total = await this.prisma.sala.count({
+      if (!salas)
+        return {
+          Message: 'Nenhuma sala com esse nome encontrado',
+          StatusCode: 404,
+        };
+      const TotalRecords = await this.prisma.sala.count({
         where: {
           tiposala: {
             nomedotipo: name,
           },
         },
       });
-      if (!salas)
-        return {
-          message: 'Nenhuma sala com esse nome encontrado',
-          status: 404,
-        };
-      return { salas, total, page, perPage, status: 200 };
+      return { Result: salas, TotalRecords, page, perPage, StatusCode: 200 };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao listar as salas por nome',
-        status: 500,
+        Message: err.message,
+        StatusCode: 500,
       };
     }
   }
 
   async update(id: number, updateSalaDto: UpdateSalaDto) {
     if (updateSalaDto.Capacidade <= 0) {
-      return { message: 'A capacidade deve ser maior que zero', status: 400 };
+      return {
+        Message: 'A capacidade deve ser maior que zero',
+        StatusCode: 400,
+      };
     }
     const tipoSalaData = await this.prisma.tiposala.findUnique({
       where: { id: updateSalaDto.IdTipoDaSala },
@@ -113,14 +140,17 @@ export class SalasService {
           idtiposala: tipoSalaData.id,
         },
       });
-      return { message: 'Sala atualizada com sucesso', status: 200 };
+      return { Message: 'Sala atualizada com sucesso', StatusCode: 200 };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          return { message: 'Nome da sala já existe', status: 400 };
+          return { Message: 'Nome da sala já existe', StatusCode: 400 };
         }
-        return { message: 'Ocorreu um erro ao atualizar a sala', status: 500 };
       }
+      return {
+        Message: err.message,
+        StatusCode: 500,
+      };
     }
   }
 
@@ -129,9 +159,9 @@ export class SalasService {
       await this.prisma.sala.delete({
         where: { id },
       });
-      return { message: 'Sala deletada com sucesso', status: 200 };
+      return { Message: 'Sala deletada com sucesso', StatusCode: 200 };
     } catch (err) {
-      return { message: 'Ocorreu um erro ao deletar a sala', status: 500 };
+      return { Message: err.message, StatusCode: 500 };
     }
   }
 }

@@ -78,7 +78,7 @@ model tiposolicitante {
 model usuario {
   id          Int           @id @default(autoincrement())
   nome        String        @db.VarChar(255)
-  email       String        @db.VarChar(255)
+  email       String        @unique @db.VarChar(255)
   senha       String        @db.VarChar(255)
   createdat   DateTime?     @default(now()) @db.Timestamp(6)
   updatedat   DateTime?     @default(now()) @db.Timestamp(6)
