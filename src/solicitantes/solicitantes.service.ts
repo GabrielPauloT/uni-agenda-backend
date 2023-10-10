@@ -13,13 +13,13 @@ export class SolicitantesService {
       !createSolicitanteDto.NomeSolicitante ||
       !createSolicitanteDto.IdTipoSolicitante
     ) {
-      return { message: 'Campos obrigatórios faltando', status: 400 };
+      return { message: 'Campos obrigatórios faltando', StatusCode: 400 };
     }
     const tipoSolicitanteData = await this.prisma.tiposolicitante.findUnique({
       where: { id: createSolicitanteDto.IdTipoSolicitante },
     });
     if (!tipoSolicitanteData)
-      return { message: 'Tipo de solicitante não encontrado', status: 404 };
+      return { message: 'Tipo de solicitante não encontrado', StatusCode: 404 };
     try {
       await this.prisma.solicitante.create({
         data: {
@@ -28,15 +28,15 @@ export class SolicitantesService {
           idtiposolicitante: tipoSolicitanteData.id,
         },
       });
-      return { message: 'Solicitante criado com sucesso', status: 201 };
+      return { message: 'Solicitante criado com sucesso', StatusCode: 201 };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          return { message: 'Nome do solicitante já existe', status: 400 };
+          return { message: 'Nome do solicitante já existe', StatusCode: 400 };
         }
         return {
-          message: 'Ocorreu um erro ao criar o solicitante',
-          status: 500,
+          Message: err.message,
+          StatusCode: 500,
         };
       }
     }
@@ -48,14 +48,20 @@ export class SolicitantesService {
         skip: (page - 1) * perPage,
         take: perPage,
       });
-      const total = this.prisma.solicitante.count();
+      const TotalRecords = await this.prisma.solicitante.count();
       if (!solicitantes)
-        return { message: 'Nenhum solicitante encontrado', status: 404 };
-      return { solicitantes, total, page, perPage, status: 200 };
+        return { message: 'Nenhum solicitante encontrado', StatusCode: 404 };
+      return {
+        Result: solicitantes,
+        TotalRecords,
+        page,
+        perPage,
+        StatusCode: 200,
+      };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao listar os solicitantes',
-        status: 500,
+        Message: err.message,
+        StatusCode: 500,
       };
     }
   }
@@ -71,20 +77,26 @@ export class SolicitantesService {
         skip: (page - 1) * perPage,
         take: perPage,
       });
-      const total = await this.prisma.solicitante.count({
+      if (!solicitantes)
+        return { message: 'Nenhum solicitante encontrado', StatusCode: 404 };
+      const TotalRecords = await this.prisma.solicitante.count({
         where: {
           tiposolicitante: {
             nomedotipo: nome,
           },
         },
       });
-      if (!solicitantes)
-        return { message: 'Nenhum solicitante encontrado', status: 404 };
-      return { solicitantes, total, page, perPage, status: 200 };
+      return {
+        Result: solicitantes,
+        TotalRecords,
+        page,
+        perPage,
+        StatusCode: 200,
+      };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao listar os solicitantes',
-        status: 500,
+        Message: err.message,
+        StatusCode: 500,
       };
     }
   }
@@ -94,11 +106,11 @@ export class SolicitantesService {
       const solicitante = await this.prisma.solicitante.findUnique({
         where: { id: id },
       });
-      return { solicitante, status: 200 };
+      return { solicitante, StatusCode: 200 };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao listar o solicitante',
-        status: 500,
+        Message: err.message,
+        StatusCode: 500,
       };
     }
   }
@@ -116,15 +128,15 @@ export class SolicitantesService {
           idtiposolicitante: tipoSolicitanteData.id,
         },
       });
-      return { message: 'Solicitante atualizado com sucesso', status: 200 };
+      return { message: 'Solicitante atualizado com sucesso', StatusCode: 200 };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          return { message: 'Nome do solicitante já existe', status: 400 };
+          return { message: 'Nome do solicitante já existe', StatusCode: 400 };
         }
         return {
-          message: 'Ocorreu um erro ao atualizar o solicitante',
-          status: 500,
+          Message: err.message,
+          StatusCode: 500,
         };
       }
     }
@@ -133,11 +145,11 @@ export class SolicitantesService {
   async remove(id: number) {
     try {
       await this.prisma.solicitante.delete({ where: { id: id } });
-      return { message: 'Solicitante deletado com sucesso', status: 200 };
+      return { message: 'Solicitante deletado com sucesso', StatusCode: 200 };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao deletar o solicitante',
-        status: 500,
+        Message: err.message,
+        StatusCode: 500,
       };
     }
   }

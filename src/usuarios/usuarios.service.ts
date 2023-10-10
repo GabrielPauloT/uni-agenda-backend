@@ -41,10 +41,17 @@ export class UsuariosService {
         skip: (page - 1) * perPage,
         take: perPage,
       });
-      const total = await this.prisma.usuario.count();
+      usuarios.forEach((usuario) => delete usuario.senha);
       if (!usuarios)
         return { message: 'Nenhum usuario encontrado', status: 404 };
-      return { usuarios, total, page, perPage, status: 200 };
+      const TotalRecords = await this.prisma.usuario.count();
+      return {
+        Result: usuarios,
+        TotalRecords,
+        Page: page,
+        PerPage: perPage,
+        StatusCode: 200,
+      };
     } catch (err) {
       return {
         message: 'Ocorreu um erro ao listar os usuarios',
@@ -63,7 +70,7 @@ export class UsuariosService {
           message: `Usuario com id: ${id} não encontrado`,
           status: 404,
         };
-      return { usuario, status: 200 };
+      return { Result: usuario, status: 200 };
     } catch (err) {
       return {
         message: 'Ocorreu um erro ao listar o usuario',

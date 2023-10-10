@@ -11,6 +11,8 @@ import { TipossolicitantesModule } from './tipossolicitantes/tipossolicitantes.m
 import { SolicitantesModule } from './solicitantes/solicitantes.module';
 import { AgendamentosModule } from './agendamentos/agendamentos.module';
 import { FaltasModule } from './faltas/faltas.module';
+import { AuthModule } from './auth/auth.module';
+import { RelatorioPdfModule } from './RelatorioPdf/relatoriopdf.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { FaltasModule } from './faltas/faltas.module';
     SolicitantesModule,
     AgendamentosModule,
     FaltasModule,
+    AuthModule,
+    RelatorioPdfModule,
   ],
   controllers: [UsuariosController],
   providers: [UsuariosService],

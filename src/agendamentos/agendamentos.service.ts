@@ -21,8 +21,8 @@ export class AgendamentosService {
     } = createAgendamentoDto;
     if ((DiaSemana.length = 0))
       return {
-        message: 'Dia da semana não pode ser igual a zero',
-        status: 400,
+        Message: 'Dia da semana não pode ser igual a zero',
+        StatusCode: 400,
       };
     if (
       !IdSala ||
@@ -34,11 +34,11 @@ export class AgendamentosService {
       !HoraFinal ||
       !HoraInicial
     )
-      return { message: 'Campos obrigatórios faltando', status: 400 };
+      return { Message: 'Campos obrigatórios faltando', StatusCode: 400 };
     if (DataInicio > DataFinal)
-      return { message: 'Data inicial maior que data final', status: 400 };
+      return { Message: 'Data inicial maior que data final', StatusCode: 400 };
     if (HoraInicial > HoraFinal)
-      return { message: 'Hora inicial maior que hora final', status: 400 };
+      return { Message: 'Hora inicial maior que hora final', StatusCode: 400 };
     const salaData = await this.prisma.sala.findUnique({
       where: { id: IdSala },
     });
@@ -62,14 +62,14 @@ export class AgendamentosService {
           idsolicitante: solicitanteData.id,
         },
       });
-      return { message: 'Agendamento criado com sucesso', status: 201 };
+      return { Message: 'Agendamento criado com sucesso', StatusCode: 201 };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          return { message: 'Agendamento já existe', status: 400 };
+          return { Message: 'Agendamento já existe', StatusCode: 400 };
         }
       }
-      return { message: err.message, status: 500 };
+      return { Message: err.Message, StatusCode: 500 };
     }
   }
 
@@ -80,13 +80,19 @@ export class AgendamentosService {
         take: perPage,
       });
       if (!agendamentos)
-        return { message: 'Nenhum agendamento encontrado', status: 404 };
-      const total = await this.prisma.agendamento.count();
-      return { agendamentos, total, page, perPage, status: 200 };
+        return { Message: 'Nenhum agendamento encontrado', StatusCode: 404 };
+      const TotalRecords = await this.prisma.agendamento.count();
+      return {
+        Result: agendamentos,
+        TotalRecords,
+        page,
+        perPage,
+        StatusCode: 200,
+      };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao listar os agendamentos',
-        status: 500,
+        Message: err.Message,
+        StatusCode: 500,
       };
     }
   }
@@ -97,12 +103,12 @@ export class AgendamentosService {
         where: { id: id },
       });
       if (!agendamento)
-        return { message: 'Agendamento não encontrado', status: 404 };
-      return { agendamento, status: 200 };
+        return { Message: 'Agendamento não encontrado', StatusCode: 404 };
+      return { Result: agendamento, StatusCode: 200 };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao listar o agendamento',
-        status: 500,
+        Message: err.Message,
+        StatusCode: 500,
       };
     }
   }
@@ -128,11 +134,11 @@ export class AgendamentosService {
           idsolicitante: solicitanteData.id,
         },
       });
-      return { message: 'Agendamento atualizado com sucesso', status: 200 };
+      return { Message: 'Agendamento atualizado com sucesso', StatusCode: 200 };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao atualizar o agendamento',
-        status: 500,
+        Message: err.Message,
+        StatusCode: 500,
       };
     }
   }
@@ -142,11 +148,11 @@ export class AgendamentosService {
       await this.prisma.agendamento.delete({
         where: { id: id },
       });
-      return { message: 'Agendamento deletado com sucesso', status: 200 };
+      return { Message: 'Agendamento deletado com sucesso', StatusCode: 200 };
     } catch (err) {
       return {
-        message: 'Ocorreu um erro ao deletar o agendamento',
-        status: 500,
+        Message: err.Message,
+        StatusCode: 500,
       };
     }
   }
