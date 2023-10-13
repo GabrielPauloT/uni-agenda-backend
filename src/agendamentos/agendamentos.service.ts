@@ -3,6 +3,8 @@ import { CreateAgendamentoDto } from './dto/create-agendamento.dto';
 import { UpdateAgendamentoDto } from './dto/update-agendamento.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import * as moment from 'moment-timezone';
+import { pegarDatasEntrePeriodos } from './utils/data';
 
 @Injectable()
 export class AgendamentosService {
@@ -19,12 +21,15 @@ export class AgendamentosService {
       IdUsuario,
       Tema,
     } = createAgendamentoDto;
-    if ((DiaSemana.length = 0))
+    const days = moment(DataFinal).diff(DataInicio, 'days');
+    const checkRangeDays = days % 7;
+    const day = moment(DataInicio).tz('America/Sao_Paulo').utc().day();
+    if (DiaSemana.length === 0)
       return {
         Message: 'Dia da semana não pode ser igual a zero',
         StatusCode: 400,
       };
-    if (
+    else if (
       !IdSala ||
       !IdSolicitante ||
       !IdUsuario ||
@@ -35,10 +40,33 @@ export class AgendamentosService {
       !HoraInicial
     )
       return { Message: 'Campos obrigatórios faltando', StatusCode: 400 };
-    if (DataInicio > DataFinal)
+    else if (DataInicio > DataFinal)
       return { Message: 'Data inicial maior que data final', StatusCode: 400 };
-    if (HoraInicial > HoraFinal)
+    else if (HoraInicial > HoraFinal)
       return { Message: 'Hora inicial maior que hora final', StatusCode: 400 };
+    else if (checkRangeDays != 0) {
+      return {
+        Message: 'Data inicial e Data Final tem que ter 7 dias de diferença',
+        StatusCode: 422,
+      };
+    } else if (DataInicio === DataFinal && !DiaSemana.includes(day)) {
+      return {
+        Message: 'Dia da semana não é igual ao dia da data inicial',
+        StatusCode: 422,
+      };
+    } else if (
+      moment(DataInicio).isBefore(moment().tz('America/Sao_Paulo').utc())
+    ) {
+      return {
+        Message: 'Data inicial não pode ser menor que a data atual',
+        StatusCode: 422,
+      };
+    }
+    console.log(
+      DataInicio,
+      moment(DataInicio),
+      moment().tz('America/Sao_Paulo').utc(),
+    );
     const salaData = await this.prisma.sala.findUnique({
       where: { id: IdSala },
     });
@@ -69,29 +97,48 @@ export class AgendamentosService {
           return { Message: 'Agendamento já existe', StatusCode: 400 };
         }
       }
-      return { Message: err.Message, StatusCode: 500 };
+      console.log(err);
+      return {
+        Message: 'Error ao cadastrar um novo agendamento',
+        StatusCode: 500,
+      };
     }
   }
 
-  async findAll(page: number, perPage: number) {
+  async findAll() {
     try {
-      const agendamentos = await this.prisma.agendamento.findMany({
-        skip: (page - 1) * perPage,
-        take: perPage,
-      });
+      const agendamentos = await this.prisma.agendamento.findMany();
       if (!agendamentos)
         return { Message: 'Nenhum agendamento encontrado', StatusCode: 404 };
       const TotalRecords = await this.prisma.agendamento.count();
+      const appoiments = agendamentos.map((agendamento) => {
+        return {
+          Id: agendamento.id,
+          IdSala: agendamento.idsala,
+          IdUsuario: agendamento.idusuario,
+          IdSolicitante: agendamento.idsolicitante,
+          DiaSemana: agendamento.diasemana,
+          Appoiments: pegarDatasEntrePeriodos(
+            agendamento.datainicio,
+            agendamento.datafinal,
+            agendamento.diasemana,
+          ),
+          DataInicio: agendamento.datainicio,
+          DataFinal: agendamento.datafinal,
+          Tema: agendamento.tema,
+          HoraInicial: agendamento.horainicial,
+          HoraFinal: agendamento.horafinal,
+        };
+      });
       return {
-        Result: agendamentos,
+        Result: appoiments,
+        // Appointment: appoiments,
         TotalRecords,
-        page,
-        perPage,
         StatusCode: 200,
       };
     } catch (err) {
       return {
-        Message: err.Message,
+        Message: err.message,
         StatusCode: 500,
       };
     }

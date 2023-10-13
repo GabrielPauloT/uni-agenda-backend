@@ -23,10 +23,10 @@ export class AgendamentosController {
     return this.agendamentosService.create(createAgendamentoDto);
   }
 
-  @Get(':page/page/:perPage/per-page')
+  @Get()
   @ApiOperation({ summary: 'Lista todos os agendamentos' })
-  findAll(@Param('page') page: string, @Param('perPage') perPage: string) {
-    return this.agendamentosService.findAll(+page, +perPage);
+  findAll() {
+    return this.agendamentosService.findAll();
   }
 
   @Get(':id')

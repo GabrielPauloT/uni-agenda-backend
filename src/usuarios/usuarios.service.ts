@@ -10,6 +10,8 @@ export class UsuariosService {
   async create(createUsuarioDto: CreateUsuarioDto) {
     try {
       const { Nome, Email, Senha } = createUsuarioDto;
+      if (!Nome || !Email || !Senha)
+        throw new NotFoundException('Dados não informados');
       await this.prisma.usuario.create({
         data: {
           nome: Nome,
@@ -17,8 +19,6 @@ export class UsuariosService {
           senha: Senha,
         },
       });
-      if (!Nome)
-        throw new NotFoundException('Nome do usuario não pode ser vazio');
       return {
         message: `Usuario com nome:${Nome} criado com sucesso`,
       };
