@@ -23,10 +23,14 @@ export class SolicitantesController {
     return this.solicitantesService.create(createSolicitanteDto);
   }
 
-  @Get(':page/page/:perPage/per-page')
+  @Get(':page/page/:perPage/per-page/nome-solicitante/:nome?/')
   @ApiOperation({ summary: 'Lista todos os solicitantes' })
-  findAll(@Param('page') page: string, @Param('perPage') perPage: string) {
-    return this.solicitantesService.findAll(+page, +perPage);
+  findAll(
+    @Param('page') page: string,
+    @Param('perPage') perPage: string,
+    @Param('nome') nome: string,
+  ) {
+    return this.solicitantesService.findAll(+page, +perPage, nome);
   }
 
   @Get(':id')

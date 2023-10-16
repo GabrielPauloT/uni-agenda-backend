@@ -41,12 +41,20 @@ export class UsuariosService {
         skip: (page - 1) * perPage,
         take: perPage,
       });
-      usuarios.forEach((usuario) => delete usuario.senha);
       if (!usuarios)
         return { message: 'Nenhum usuario encontrado', status: 404 };
+      const usuariosSemSenha = usuarios.map((usuario) => {
+        return {
+          Id: usuario.id,
+          Nome: usuario.nome,
+          Email: usuario.email,
+          CriadoEm: usuario.createdat,
+          AtualizadoEm: usuario.updatedat,
+        };
+      });
       const TotalRecords = await this.prisma.usuario.count();
       return {
-        Result: usuarios,
+        Result: usuariosSemSenha,
         TotalRecords,
         Page: page,
         PerPage: perPage,

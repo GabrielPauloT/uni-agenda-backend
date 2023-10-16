@@ -42,11 +42,17 @@ export class SolicitantesService {
     }
   }
 
-  async findAll(page: number, perPage: number) {
+  async findAll(page: number, perPage: number, nome?: string) {
     try {
       const solicitantes = await this.prisma.solicitante.findMany({
         skip: (page - 1) * perPage,
         take: perPage,
+        where: {
+          nome: {
+            contains: nome,
+            mode: 'insensitive',
+          },
+        },
       });
       const TotalRecords = await this.prisma.solicitante.count();
       if (!solicitantes)

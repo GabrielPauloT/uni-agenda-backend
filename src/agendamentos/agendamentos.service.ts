@@ -107,16 +107,27 @@ export class AgendamentosService {
 
   async findAll() {
     try {
-      const agendamentos = await this.prisma.agendamento.findMany();
+      const agendamentos = await this.prisma.agendamento.findMany({
+        include: {
+          solicitante: true,
+          falta: true,
+          usuario: true,
+          sala: true,
+        },
+      });
       if (!agendamentos)
         return { Message: 'Nenhum agendamento encontrado', StatusCode: 404 };
       const TotalRecords = await this.prisma.agendamento.count();
       const appoiments = agendamentos.map((agendamento) => {
+        const result: Record<string, boolean> = {};
+        for (const falta of agendamento.falta) {
+          result[moment(falta.data).format('YYYY-MM-DD')] = true;
+        }
         return {
           Id: agendamento.id,
-          IdSala: agendamento.idsala,
-          IdUsuario: agendamento.idusuario,
-          IdSolicitante: agendamento.idsolicitante,
+          IdSala: agendamento.sala,
+          IdUsuario: agendamento.usuario,
+          Solicitante: agendamento.solicitante,
           DiaSemana: agendamento.diasemana,
           Appoiments: pegarDatasEntrePeriodos(
             agendamento.datainicio,
@@ -126,13 +137,15 @@ export class AgendamentosService {
           DataInicio: agendamento.datainicio,
           DataFinal: agendamento.datafinal,
           Tema: agendamento.tema,
+          Falta: result,
           HoraInicial: agendamento.horainicial,
           HoraFinal: agendamento.horafinal,
+          CriadoEm: agendamento.createdat,
+          AtualizadoEm: agendamento.updatedat,
         };
       });
       return {
         Result: appoiments,
-        // Appointment: appoiments,
         TotalRecords,
         StatusCode: 200,
       };

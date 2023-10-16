@@ -1,6 +1,8 @@
 import { randomUUID } from 'crypto';
 import * as moment from 'moment-timezone';
 
+const _TOTALDIASEMANA_ = 7;
+
 export function pegarDatasEntrePeriodos(
   dataInicial: Date,
   dataFinal: Date,
@@ -30,7 +32,7 @@ export function pegarDatasEntrePeriodos(
         data: outroDia.format('YYYY-MM-DD'),
       });
     }
-    dataIterada = dataIterada.add(7, 'day');
+    dataIterada = dataIterada.add(_TOTALDIASEMANA_, 'day');
   } while (dataIterada.isSameOrBefore(dataFinal));
   return agendamentos;
 }
