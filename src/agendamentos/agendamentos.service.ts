@@ -125,8 +125,8 @@ export class AgendamentosService {
         }
         return {
           Id: agendamento.id,
-          IdSala: agendamento.sala,
-          IdUsuario: agendamento.usuario,
+          Sala: agendamento.sala,
+          Usuario: agendamento.usuario,
           Solicitante: agendamento.solicitante,
           DiaSemana: agendamento.diasemana,
           Appoiments: pegarDatasEntrePeriodos(
