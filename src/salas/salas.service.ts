@@ -61,11 +61,11 @@ export class SalasService {
       return {
         Result: salas.map((sala) => ({
           id: sala.id,
-          tipo: sala.tiposala ? sala.tiposala.nomedotipo : null,
+          tipo: sala.tiposala,
           nome: sala.nomedasala,
           capacidade: sala.capacidade,
-          createdat: sala.createdat,
-          updatedat: sala.updatedat,
+          CriadoEm: sala.createdat,
+          AtualizadoEm: sala.updatedat,
         })),
         TotalRecords,
         page,

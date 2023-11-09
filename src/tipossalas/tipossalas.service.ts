@@ -39,10 +39,16 @@ export class TipossalasService {
         skip: (page - 1) * perPage,
         take: perPage,
       });
-      const total = await this.prisma.tiposala.count();
+      const TotalRecords = await this.prisma.tiposala.count();
       if (!tiposSalas)
         return { message: 'Nenhum tipo de sala encontrado', status: 404 };
-      return { tiposSalas, total, page, perPage, status: 200 };
+      return {
+        Result: tiposSalas,
+        TotalRecords,
+        page,
+        perPage,
+        status: 200,
+      };
     } catch (err) {
       return {
         message: 'Ocorreu um erro ao listar os tipos de salas',

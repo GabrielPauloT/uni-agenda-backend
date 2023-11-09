@@ -13,6 +13,7 @@ import { AgendamentosModule } from './agendamentos/agendamentos.module';
 import { FaltasModule } from './faltas/faltas.module';
 import { AuthModule } from './auth/auth.module';
 import { RelatorioPdfModule } from './RelatorioPdf/relatoriopdf.module';
+import { HorariosalteradosModule } from './horariosalterados/horariosalterados.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RelatorioPdfModule } from './RelatorioPdf/relatoriopdf.module';
     FaltasModule,
     AuthModule,
     RelatorioPdfModule,
+    HorariosalteradosModule,
   ],
   controllers: [UsuariosController],
   providers: [UsuariosService],

@@ -45,13 +45,19 @@ export class TipossolicitantesService {
         skip: (page - 1) * perPage,
         take: perPage,
       });
-      const total = await this.prisma.tiposolicitante.count();
+      const TotalRecords = await this.prisma.tiposolicitante.count();
       if (!tiposSolicitantes)
         return {
           message: 'Nenhum tipo de solicitante encontrado',
           status: 404,
         };
-      return { tiposSolicitantes, total, page, perPage, status: 200 };
+      return {
+        Result: tiposSolicitantes,
+        TotalRecords,
+        page,
+        perPage,
+        status: 200,
+      };
     } catch (err) {
       return {
         message: 'Ocorreu um erro ao listar os tipos de solicitantes',

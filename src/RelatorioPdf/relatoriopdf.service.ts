@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { RelatorioFaltaDto } from './dto/relatorio-falta.dto';
 
 @Injectable()
 export class RelatorioPdfService {
   constructor(private prisma: PrismaService) {}
-  async generatePdf(periodo: Date): Promise<Buffer> {
+  async generatePdf(data: RelatorioFaltaDto): Promise<Buffer> {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     const falta = await this.prisma.falta.findMany({
       where: {
-        data: { gte: periodo },
+        data: {
+          gte: data.DataInicio,
+          lte: data.DataFim,
+        },
       },
       include: {
         agendamento: {

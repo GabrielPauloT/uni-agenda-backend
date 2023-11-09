@@ -17,9 +17,10 @@ export class FaltasService {
       });
       if (!agendamentoData)
         return { message: 'Agendamento não encontrado', status: 404 };
+      const dataFormatada = new Date(Data);
       await this.prisma.falta.create({
         data: {
-          data: Data,
+          data: dataFormatada,
           idagendamento: agendamentoData.id,
         },
       });
@@ -32,10 +33,7 @@ export class FaltasService {
           return { message: 'Falta já existe', status: 400 };
         }
       }
-      return {
-        message: 'Ocorreu um erro ao criar a falta',
-        status: 500,
-      };
+      return { message: err.message, status: 500 };
     }
   }
 

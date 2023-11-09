@@ -10,22 +10,23 @@ datasource db {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model agendamento {
-  id            Int         @id @default(autoincrement())
-  idsala        Int
-  idsolicitante Int
-  idusuario     Int
-  diasemana     Int[]       @db.SmallInt
-  horainicial   String      @db.VarChar(5)
-  horafinal     String      @db.VarChar(5)
-  datainicio    DateTime    @db.Date
-  datafinal     DateTime    @db.Date
-  tema          String      @db.VarChar(75)
-  createdat     DateTime?   @default(now()) @db.Timestamp(6)
-  updatedat     DateTime?   @default(now()) @db.Timestamp(6)
-  sala          sala        @relation(fields: [idsala], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  solicitante   solicitante @relation(fields: [idsolicitante], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  usuario       usuario     @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  falta         falta[]
+  id                Int                 @id @default(autoincrement())
+  idsala            Int
+  idsolicitante     Int
+  idusuario         Int
+  diasemana         Int[]               @db.SmallInt
+  horainicial       String              @db.VarChar(5)
+  horafinal         String              @db.VarChar(5)
+  datainicio        DateTime            @db.Date
+  datafinal         DateTime            @db.Date
+  tema              String              @db.VarChar(75)
+  createdat         DateTime?           @default(now()) @db.Timestamp(6)
+  updatedat         DateTime?           @default(now()) @db.Timestamp(6)
+  sala              sala                @relation(fields: [idsala], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  solicitante       solicitante         @relation(fields: [idsolicitante], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario           usuario             @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  falta             falta[]
+  horariosalterados horariosalterados[]
 }
 
 model falta {
@@ -84,4 +85,13 @@ model usuario {
   createdat   DateTime?     @default(now()) @db.Timestamp(6)
   updatedat   DateTime?     @default(now()) @db.Timestamp(6)
   agendamento agendamento[]
+}
+
+model horariosalterados {
+  id            Int          @id @default(autoincrement())
+  idagendamento Int?
+  data          DateTime?    @db.Date
+  horainicial   String?      @db.VarChar(5)
+  horafinal     String?      @db.VarChar(5)
+  agendamento   agendamento? @relation(fields: [idagendamento], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

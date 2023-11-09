@@ -8,10 +8,17 @@ import { RelatorioPdfService } from './relatoriopdf.service';
 export class RelatorioPdfController {
   constructor(private readonly relatorioService: RelatorioPdfService) {}
 
-  @Get(':periodo')
+  @Get('dataInicio/:dataInicio/dataFim/:dataFim')
   @ApiOperation({ summary: 'Gera um relatório em PDF' })
-  async generatePdf(@Param('periodo') periodo: Date, @Res() res: Response) {
-    const pdfBuffer = await this.relatorioService.generatePdf(periodo);
+  async generatePdf(
+    @Param('dataInicio') dataInicio: Date,
+    @Param('dataFim') dataFim: Date,
+    @Res() res: Response,
+  ) {
+    const pdfBuffer = await this.relatorioService.generatePdf({
+      DataInicio: dataInicio,
+      DataFim: dataFim,
+    });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=relatorio.pdf`);

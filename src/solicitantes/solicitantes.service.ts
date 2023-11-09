@@ -47,6 +47,9 @@ export class SolicitantesService {
       const solicitantes = await this.prisma.solicitante.findMany({
         skip: (page - 1) * perPage,
         take: perPage,
+        include: {
+          tiposolicitante: true,
+        },
         where: {
           nome: {
             contains: nome,
@@ -57,8 +60,17 @@ export class SolicitantesService {
       const TotalRecords = await this.prisma.solicitante.count();
       if (!solicitantes)
         return { message: 'Nenhum solicitante encontrado', StatusCode: 404 };
+      const solicitantesData = solicitantes.map((solicitante) => ({
+        Id: solicitante.id,
+        NomeSolicitante: solicitante.nome,
+        EmailSolicitante: solicitante.email,
+        IdTipoSolicitante: solicitante.tiposolicitante.id,
+        NomeTipoSolicitante: solicitante.tiposolicitante.nomedotipo,
+        CriadoEm: solicitante.createdat,
+        AtualizadoEm: solicitante.updatedat,
+      }));
       return {
-        Result: solicitantes,
+        Result: solicitantesData,
         TotalRecords,
         page,
         perPage,

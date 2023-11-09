@@ -21,8 +21,6 @@ export class AgendamentosService {
       IdUsuario,
       Tema,
     } = createAgendamentoDto;
-    const days = moment(DataFinal).diff(DataInicio, 'days');
-    const checkRangeDays = days % 7;
     const day = moment(DataInicio).tz('America/Sao_Paulo').utc().day();
     if (DiaSemana.length === 0)
       return {
@@ -44,29 +42,26 @@ export class AgendamentosService {
       return { Message: 'Data inicial maior que data final', StatusCode: 400 };
     else if (HoraInicial > HoraFinal)
       return { Message: 'Hora inicial maior que hora final', StatusCode: 400 };
-    else if (checkRangeDays != 0) {
-      return {
-        Message: 'Data inicial e Data Final tem que ter 7 dias de diferença',
-        StatusCode: 422,
-      };
-    } else if (DataInicio === DataFinal && !DiaSemana.includes(day)) {
+    else if (DataInicio === DataFinal && !DiaSemana.includes(day)) {
       return {
         Message: 'Dia da semana não é igual ao dia da data inicial',
         StatusCode: 422,
       };
     } else if (
-      moment(DataInicio).isBefore(moment().tz('America/Sao_Paulo').utc())
+      moment(`${DataInicio}T${HoraInicial}`).isBefore(
+        moment().tz('America/Sao_Paulo').utcOffset(-3),
+      )
     ) {
       return {
-        Message: 'Data inicial não pode ser menor que a data atual',
+        Message: `Data inicial: ${moment(`${DataInicio}T${HoraInicial}`).format(
+          'DD/MM/YYYY HH:mm',
+        )} não pode ser menor que a data atual: ${moment()
+          .tz('America/Sao_Paulo')
+          .utcOffset(-3)
+          .format('DD/MM/YYYY HH:mm')}`,
         StatusCode: 422,
       };
     }
-    console.log(
-      DataInicio,
-      moment(DataInicio),
-      moment().tz('America/Sao_Paulo').utc(),
-    );
     const salaData = await this.prisma.sala.findUnique({
       where: { id: IdSala },
     });
@@ -79,8 +74,8 @@ export class AgendamentosService {
     try {
       await this.prisma.agendamento.create({
         data: {
-          datainicio: DataInicio,
-          datafinal: DataFinal,
+          datainicio: moment(DataInicio).toDate(),
+          datafinal: moment(DataFinal).toDate(),
           tema: Tema,
           diasemana: DiaSemana,
           horainicial: HoraInicial,
@@ -97,7 +92,6 @@ export class AgendamentosService {
           return { Message: 'Agendamento já existe', StatusCode: 400 };
         }
       }
-      console.log(err);
       return {
         Message: 'Error ao cadastrar um novo agendamento',
         StatusCode: 500,
@@ -113,6 +107,7 @@ export class AgendamentosService {
           falta: true,
           usuario: true,
           sala: true,
+          horariosalterados: true,
         },
       });
       if (!agendamentos)
@@ -121,7 +116,12 @@ export class AgendamentosService {
       const appoiments = agendamentos.map((agendamento) => {
         const result: Record<string, boolean> = {};
         for (const falta of agendamento.falta) {
-          result[moment(falta.data).format('YYYY-MM-DD')] = true;
+          result[
+            moment(falta.data)
+              .tz('America/Sao_Paulo')
+              .utc()
+              .format('YYYY-MM-DD')
+          ] = true;
         }
         return {
           Id: agendamento.id,
@@ -134,6 +134,7 @@ export class AgendamentosService {
             agendamento.datafinal,
             agendamento.diasemana,
           ),
+          HorariosAlterados: agendamento.horariosalterados,
           DataInicio: agendamento.datainicio,
           DataFinal: agendamento.datafinal,
           Tema: agendamento.tema,
